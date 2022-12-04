@@ -1,0 +1,15 @@
+model_params:
+
+depth_completion_params:
+  test: True
+  checkpoint: best_2dpapenet.ckpt
+  add_lines: 32
+
+dataset_params:
+  label_mapping: ./config/semantic-kitti.yaml
+  data_path: "/root/autodl-tmp/SemanticKITTI/sequences"
+  velodyne_proj_path: ./config/calib.txt
+  scan_point_num: 2048
+  H: 352
+  W: 1216
+  num_vote: 1
