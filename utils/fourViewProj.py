@@ -30,15 +30,22 @@ class FourViewProj():
         xyz = pc_data[:, :3]
         xyz1 = np.concatenate([xyz, np.ones((xyz.shape[0], 1))], axis=1)
         proj_xyz = (self.T_xyz[:3, :] @ xyz1.T).T
-        pc_range = np.linalg.norm(xyz, axis=1)
-        pitch = np.arcsin(proj_xyz[:, 2] / pc_range) / np.pi * 180
-        yaw = np.arctan2(-proj_xyz[:, 1], -proj_xyz[:, 0]) / np.pi
-        yaw = 0.5 * (yaw + 1)
-        jump_idx = ((yaw[1:] < 0.2) * (yaw[:-1] > 0.8))
-        jump_idx = np.nonzero(jump_idx)[0] + 1
-        jump = np.zeros_like(pitch).astype(np.uint32)
-        jump[jump_idx] = 1
-        jump = np.cumsum(jump).astype(np.uint32)
+        # pc_range = np.linalg.norm(proj_xyz[:, :3], axis=1)
+
+        # mask = (pc_range > 2.) * (pc_range < 30.)
+        # proj_xyz = proj_xyz[mask]
+        # xyz = xyz[mask]
+        # xyz1 = xyz1[mask]
+        # pc_range = pc_range[mask]
+
+        # pitch = np.arcsin(proj_xyz[:, 2] / pc_range) / np.pi * 180
+        # yaw = np.arctan2(-proj_xyz[:, 1], -proj_xyz[:, 0]) / np.pi
+        # yaw = 0.5 * (yaw + 1)
+        # jump_idx = ((yaw[1:] < 0.2) * (yaw[:-1] > 0.8))
+        # jump_idx = np.nonzero(jump_idx)[0] + 1
+        # jump = np.zeros_like(pitch).astype(np.uint32)
+        # jump[jump_idx] = 1
+        # jump = np.cumsum(jump).astype(np.uint32)
 
         self.velodyne_proj_img = np.zeros((self.H, 4 * self.W))
         self.get_velodyne_proj_img(proj_xyz, self.velodyne_proj_img)
@@ -48,6 +55,7 @@ class FourViewProj():
         # self.velodyne_proj_img3 = self.velodyne_proj_img[:, self.W * 3:self.W * 4, ...]
 
     def get_velodyne_proj_img(self, proj_points, velodyne_proj_img):
+        proj_points = np.flipud(proj_points)
         K = self.K
         T_4img = self.T_4img
         T_velo2img = self.T_velo2img
@@ -109,10 +117,34 @@ class FourViewProj():
         coordinate3 = np.fliplr(coordinate3[mask].astype(np.int32))
         proj_points3 = proj_points3[mask]
 
-        velodyne_proj_img[coordinate0[:, 0], coordinate0[:, 1]] = proj_points0[:, 2]
-        velodyne_proj_img[coordinate1[:, 0], coordinate1[:, 1] + W] = proj_points1[:, 2]
-        velodyne_proj_img[coordinate2[:, 0], coordinate2[:, 1] + 2 * W] = proj_points2[:, 2]
-        velodyne_proj_img[coordinate3[:, 0], coordinate3[:, 1] + 3 * W] = proj_points3[:, 2]
+        for i in range(len(coordinate0)):
+            if velodyne_proj_img[coordinate0[i, 0], coordinate0[i, 1]] == 0:
+                velodyne_proj_img[coordinate0[i, 0], coordinate0[i, 1]] = proj_points0[i, 2]
+            else:
+                velodyne_proj_img[coordinate0[i, 0], coordinate0[i, 1]] = min(proj_points0[i, 2], velodyne_proj_img[coordinate0[i, 0],
+                                                                                                                    coordinate0[i, 1]])
+        for i in range(len(coordinate1)):
+            if velodyne_proj_img[coordinate1[i, 0], coordinate1[i, 1]] == 0:
+                velodyne_proj_img[coordinate1[i, 0], coordinate1[i, 1] + W] = proj_points1[i, 2]
+            else:
+                velodyne_proj_img[coordinate1[i, 0], coordinate1[i, 1] + W] = min(proj_points1[i, 2], velodyne_proj_img[coordinate1[i, 0],
+                                                                                                                        coordinate1[i, 1]])
+        for i in range(len(coordinate2)):
+            if velodyne_proj_img[coordinate2[i, 0], coordinate2[i, 1]] == 0:
+                velodyne_proj_img[coordinate2[i, 0], coordinate2[i, 1] + 2 * W] = proj_points2[i, 2]
+            else:
+                velodyne_proj_img[coordinate2[i, 0], coordinate2[i, 1] + 2 * W] = min(proj_points2[i, 2], velodyne_proj_img[coordinate2[i, 0],
+                                                                                                                            coordinate2[i, 1]])
+        for i in range(len(coordinate3)):
+            if velodyne_proj_img[coordinate3[i, 0], coordinate3[i, 1]] == 0:
+                velodyne_proj_img[coordinate3[i, 0], coordinate3[i, 1] + 3 * W] = proj_points3[i, 2]
+            else:
+                velodyne_proj_img[coordinate3[i, 0], coordinate3[i, 1] + 3 * W] = min(proj_points3[i, 2], velodyne_proj_img[coordinate3[i, 0],
+                                                                                                                            coordinate3[i, 1]])
+        # velodyne_proj_img[coordinate0[:, 0], coordinate0[:, 1]] = proj_points0[:, 2]
+        # velodyne_proj_img[coordinate1[:, 0], coordinate1[:, 1] + W] = proj_points1[:, 2]
+        # velodyne_proj_img[coordinate2[:, 0], coordinate2[:, 1] + 2 * W] = proj_points2[:, 2]
+        # velodyne_proj_img[coordinate3[:, 0], coordinate3[:, 1] + 3 * W] = proj_points3[:, 2]
 
     def show4ProjImg(self):
         for i in range(4):

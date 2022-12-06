@@ -7,6 +7,7 @@ from torchvision.transforms import transforms
 import numpy as np
 from torch.utils.data import DataLoader
 from depth_completion._2dpapenet import get_model as DepthCompletionModel
+import tensorboardX
 
 totensor = transforms.ToTensor()
 topil = transforms.ToPILImage()
