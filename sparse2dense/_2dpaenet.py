@@ -33,4 +33,9 @@ class get_model(LightningModule):
                 input = self.cd_branch(input)
                 input = self.fusion(input)
             input = self.dd_branch(input)
-            return input
+        all_fuse_output = []
+        for i in range(4):
+            all_fuse_output.append(input['fuse_output'][i:i + 1, ...])
+        all_fuse_output = torch.cat(all_fuse_output, dim=-1)
+        input['all_fuse_output'] = all_fuse_output
+        return input
