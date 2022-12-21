@@ -13,3 +13,5 @@ dataset_params:
   H: 352
   W: 1216
   num_vote: 1
+
+hidden_layer: 128

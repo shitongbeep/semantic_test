@@ -13,19 +13,17 @@ class get_model(pl.LightningModule):
         self.geoplanes = 3
         self.geofeature = GeometryFeature()
 
+        self.hidden_layer = self.args.hidden_layer
         # *mid_branch network encoder
-        self.mid_branch_conv_init = convbnlrelui(in_channels=1, out_channels=32, kernel_size=5, stride=1, padding=2)
-        self.mid_branch_encoder_layer1 = BasicBlockGeo(inplanes=32, planes=64, stride=2, geoplanes=self.geoplanes)
-        self.mid_branch_encoder_layer2 = BasicBlockGeo(inplanes=64, planes=128, stride=2, geoplanes=self.geoplanes)
-        self.mid_branch_encoder_layer3 = BasicBlockGeo(inplanes=128, planes=256, stride=2, geoplanes=self.geoplanes)
-        self.mid_branch_encoder_layer4 = BasicBlockGeo(inplanes=256, planes=512, stride=2, geoplanes=self.geoplanes)
-        # mid_branch network decoder
-        self.mid_branch_decoder_layer3 = deconvbnlrelui(in_channels=512, out_channels=256, kernel_size=5, stride=2, padding=2, output_padding=1)
-        self.mid_branch_decoder_layer2 = deconvbnlrelui(in_channels=256, out_channels=128, kernel_size=5, stride=2, padding=2, output_padding=1)
-        self.mid_branch_decoder_layer1 = deconvbnlrelui(in_channels=128, out_channels=64, kernel_size=5, stride=2, padding=2, output_padding=1)
-        self.mid_branch_conv_uninit = deconvbnlrelui(in_channels=64, out_channels=32, kernel_size=5, stride=2, padding=2, output_padding=1)
-        self.mid_branch_output = convbnlrelui(in_channels=32, out_channels=2, kernel_size=3, stride=1, padding=1)
-
+        self.mid_branch_conv = nn.Sequential(nn.Conv2d(1, 32, kernel_size=3, padding=1, bias=False), nn.BatchNorm2d(32),
+                                             nn.LeakyReLU(0.1, inplace=True), nn.Conv2d(32, 32, kernel_size=3, padding=1, bias=False),
+                                             nn.BatchNorm2d(32), nn.LeakyReLU(0.1, inplace=True),
+                                             nn.Conv2d(32, 32, kernel_size=5, padding=2, bias=False), nn.BatchNorm2d(32),
+                                             nn.LeakyReLU(0.1, inplace=True))
+        self.mid_branch_mlp = nn.Sequential(nn.Linear(32, self.hidden_layer), nn.LeakyReLU(0.1, inplace=True),
+                                            nn.Linear(self.hidden_layer, self.hidden_layer), nn.LeakyReLU(0.1, inplace=True),
+                                            nn.Linear(self.hidden_layer, self.hidden_layer // 2), nn.LeakyReLU(0.1, inplace=True))
+        self.mid_branch_output = nn.Sequential(nn.Linear(self.hidden_layer // 2, 2), nn.LeakyReLU(0.1, inplace=True))
         # *others
         self.pooling = nn.AvgPool2d(kernel_size=2, stride=2)
         self.sparsepooling = SparseDownSampleClose(stride=2)
@@ -75,37 +73,9 @@ class get_model(pl.LightningModule):
         geo_s5 = self.geofeature(d_s5, vnorm_s5, unorm_s5, 352, 1216, c352, c1216, f352, f1216)
         geo_s6 = self.geofeature(d_s6, vnorm_s6, unorm_s6, 352, 1216, c352, c1216, f352, f1216)
 
-        # *Encoder
-        # 1 --> 32
-        mid_branch_feature = self.mid_branch_conv_init(d)
-        # iv  32 --> 64
-        mid_branch_feature1 = self.mid_branch_encoder_layer1(mid_branch_feature, geo_s1, geo_s2)
-        # iii  64 --> 128
-        mid_branch_feature2 = self.mid_branch_encoder_layer2(mid_branch_feature1, geo_s2, geo_s3)
-        # ii  128 --> 256
-        mid_branch_feature3 = self.mid_branch_encoder_layer3(mid_branch_feature2, geo_s3, geo_s4)
-        # i  256 --> 512
-        mid_branch_feature4 = self.mid_branch_encoder_layer4(mid_branch_feature3, geo_s4, geo_s5)
-        # *Decoder
-        # 512 --> 256
-        mid_branch_feature_decoder3 = self.mid_branch_decoder_layer3(mid_branch_feature4)
-        mid_branch_feature_decoder3 = mid_branch_feature_decoder3 + mid_branch_feature3
-        # 56 --> 128
-        mid_branch_feature_decoder2 = self.mid_branch_decoder_layer2(mid_branch_feature_decoder3)
-        mid_branch_feature_decoder2 = mid_branch_feature_decoder2 + mid_branch_feature2
-        # 128 --> 64
-        mid_branch_feature_decoder1 = self.mid_branch_decoder_layer1(mid_branch_feature_decoder2)
-        mid_branch_feature_decoder1 = mid_branch_feature_decoder1 + mid_branch_feature1
-        # 64 --> 32
-        mid_branch_feature_decoder = self.mid_branch_conv_uninit(mid_branch_feature_decoder1)
-        mid_branch_feature_decoder = mid_branch_feature_decoder + mid_branch_feature
-        # 32 --> 1
-        mid_branch_output = self.mid_branch_output(mid_branch_feature_decoder)
-
-        input['mid_feature_decoder3'] = mid_branch_feature_decoder3
-        input['mid_feature_decoder2'] = mid_branch_feature_decoder2
-        input['mid_feature_decoder1'] = mid_branch_feature_decoder1
-        input['mid_feature_decoder0'] = mid_branch_feature_decoder
+        conv_init = self.mid_branch_conv(d).permute(0, 2, 3, 1).contiguous()
+        mlp_feature = self.mid_branch_mlp(conv_init)
+        mlp_output = self.mid_branch_output(mlp_feature).permute(0, 3, 1, 2).contiguous()
 
         input['geo_s1'] = geo_s1
         input['geo_s2'] = geo_s2
@@ -114,7 +84,7 @@ class get_model(pl.LightningModule):
         input['geo_s5'] = geo_s5
         input['geo_s6'] = geo_s6
 
-        input['mid_branch_output'] = mid_branch_output[:, 0:1, ...]
-        input['mid_branch_confidence'] = mid_branch_output[:, 1:2, ...]
+        input['mid_branch_output'] = mlp_output[:, 0:1, ...]
+        input['mid_branch_confidence'] = mlp_output[:, 1:2, ...]
 
         return input

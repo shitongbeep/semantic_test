@@ -213,6 +213,7 @@ class SemanticKITTI(Dataset):
         return len(self.velodyne_idx)
 
     def __getitem__(self, index):
+        print(index)
         raw_data = np.fromfile(self.velodyne_idx[index], dtype=np.float32).reshape((-1, 4))
         point = raw_data[:, :3]
         distance = np.linalg.norm(point, axis=1).astype(np.float32)

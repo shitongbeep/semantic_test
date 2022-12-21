@@ -15,13 +15,13 @@ class get_model(pl.LightningModule):
 
         # *dd_branch network encoder
         self.dd_branch_conv_init = convbnlrelui(in_channels=2, out_channels=32, kernel_size=5, stride=1, padding=2)
-        self.dd_branch_encoder_layer1 = BasicBlockGeo(inplanes=64, planes=64, stride=2, geoplanes=self.geoplanes)
+        self.dd_branch_encoder_layer1 = BasicBlockGeo(inplanes=32, planes=64, stride=2, geoplanes=self.geoplanes)
         self.dd_branch_encoder_layer11 = BasicBlockGeo(inplanes=64, planes=64, stride=1, geoplanes=self.geoplanes)
-        self.dd_branch_encoder_layer2 = BasicBlockGeo(inplanes=128, planes=128, stride=2, geoplanes=self.geoplanes)
+        self.dd_branch_encoder_layer2 = BasicBlockGeo(inplanes=64, planes=128, stride=2, geoplanes=self.geoplanes)
         self.dd_branch_encoder_layer22 = BasicBlockGeo(inplanes=128, planes=128, stride=1, geoplanes=self.geoplanes)
-        self.dd_branch_encoder_layer3 = BasicBlockGeo(inplanes=256, planes=256, stride=2, geoplanes=self.geoplanes)
+        self.dd_branch_encoder_layer3 = BasicBlockGeo(inplanes=128, planes=256, stride=2, geoplanes=self.geoplanes)
         self.dd_branch_encoder_layer33 = BasicBlockGeo(inplanes=256, planes=256, stride=1, geoplanes=self.geoplanes)
-        self.dd_branch_encoder_layer4 = BasicBlockGeo(inplanes=512, planes=512, stride=2, geoplanes=self.geoplanes)
+        self.dd_branch_encoder_layer4 = BasicBlockGeo(inplanes=256, planes=512, stride=2, geoplanes=self.geoplanes)
         self.dd_branch_encoder_layer44 = BasicBlockGeo(inplanes=512, planes=512, stride=1, geoplanes=self.geoplanes)
         self.dd_branch_encoder_layer5 = BasicBlockGeo(inplanes=512, planes=1024, stride=2, geoplanes=self.geoplanes)
         self.dd_branch_encoder_layer55 = BasicBlockGeo(inplanes=1024, planes=1024, stride=1, geoplanes=self.geoplanes)
@@ -42,8 +42,9 @@ class get_model(pl.LightningModule):
 
     def forward(self, input):
         d = input['d']
-        mid_output = input['mid_branch_output']
-        dd = torch.cat([d, mid_output], dim=1)
+        mid_branch_output = input['mid_branch_output']
+        mid_branch_confidence = input['mid_branch_confidence']
+        dd = torch.cat([d, mid_branch_output], dim=1)
 
         geo_s1 = input['geo_s1']
         geo_s2 = input['geo_s2']
@@ -52,31 +53,20 @@ class get_model(pl.LightningModule):
         geo_s5 = input['geo_s5']
         geo_s6 = input['geo_s6']
 
-        mid_branch_feature_decoder3 = input['mid_feature_decoder3']
-        mid_branch_feature_decoder2 = input['mid_feature_decoder2']
-        mid_branch_feature_decoder1 = input['mid_feature_decoder1']
-        mid_branch_feature_decoder = input['mid_feature_decoder0']
-        mid_branch_output = input['mid_branch_output']
-        mid_branch_confidence = input['mid_branch_confidence']
-
         # *Encoder
         # 2 --> 32
         dd_branch_feature = self.dd_branch_conv_init(dd)
         # iv  64 --> 64
-        dd_branch_feature1 = torch.cat([dd_branch_feature, mid_branch_feature_decoder], dim=1)
-        dd_branch_feature1 = self.dd_branch_encoder_layer1(dd_branch_feature1, geo_s1, geo_s2)
+        dd_branch_feature1 = self.dd_branch_encoder_layer1(dd_branch_feature, geo_s1, geo_s2)
         dd_branch_feature1 = self.dd_branch_encoder_layer11(dd_branch_feature1, geo_s2, geo_s2)
         # iii  128 --> 128
-        dd_branch_feature2 = torch.cat([dd_branch_feature1, mid_branch_feature_decoder1], dim=1)
-        dd_branch_feature2 = self.dd_branch_encoder_layer2(dd_branch_feature2, geo_s2, geo_s3)
+        dd_branch_feature2 = self.dd_branch_encoder_layer2(dd_branch_feature1, geo_s2, geo_s3)
         dd_branch_feature2 = self.dd_branch_encoder_layer22(dd_branch_feature2, geo_s3, geo_s3)
         # ii  256 --> 256
-        dd_branch_feature3 = torch.cat([dd_branch_feature2, mid_branch_feature_decoder2], dim=1)
-        dd_branch_feature3 = self.dd_branch_encoder_layer3(dd_branch_feature3, geo_s3, geo_s4)
+        dd_branch_feature3 = self.dd_branch_encoder_layer3(dd_branch_feature2, geo_s3, geo_s4)
         dd_branch_feature3 = self.dd_branch_encoder_layer33(dd_branch_feature3, geo_s4, geo_s4)
         # i  512 --> 512
-        dd_branch_feature4 = torch.cat([dd_branch_feature3, mid_branch_feature_decoder3], dim=1)
-        dd_branch_feature4 = self.dd_branch_encoder_layer4(dd_branch_feature4, geo_s4, geo_s5)
+        dd_branch_feature4 = self.dd_branch_encoder_layer4(dd_branch_feature3, geo_s4, geo_s5)
         dd_branch_feature4 = self.dd_branch_encoder_layer44(dd_branch_feature4, geo_s5, geo_s5)
 
         dd_branch_feature5 = self.dd_branch_encoder_layer5(dd_branch_feature4, geo_s5, geo_s6)
@@ -103,6 +93,8 @@ class get_model(pl.LightningModule):
 
         input['dd_feature'] = dd_branch_feature_decoder
         input['dd_branch_output'] = dd_branch_output[:, 0:1, ...]
+        input['dd_branch_confidence'] = dd_conf
+        input['mid_branch_confidence'] = mid_conf
         input['fuse_output'] = dd_branch_output[:, 0:1, ...] * dd_conf + mid_branch_output * mid_conf
 
         return input
