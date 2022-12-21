@@ -1,0 +1,86 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.1"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3
+					]
+				}
+			],
+			"name" : "Release",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "bin2pcd",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "bin2pcd::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-bin2pcd-Release-905f053e83ac731a0809.json",
+					"name" : "bin2pcd",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "filterpcd::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-filterpcd-Release-589b78e0e17ceb614072.json",
+					"name" : "filterpcd",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "merge_pc::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-merge_pc-Release-23c53bc2affa361f1839.json",
+					"name" : "merge_pc",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "visualizedense::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-visualizedense-Release-2c5e0da9c0bfb9f1b21b.json",
+					"name" : "visualizedense",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/shitong/segementation/semantic_test/bin2pcd/build",
+		"source" : "/home/shitong/segementation/semantic_test/bin2pcd"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 0
+	}
+}

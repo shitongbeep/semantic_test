@@ -1,0 +1,22 @@
+[
+{
+  "directory": "/home/shitong/segementation/semantic_test/bin2pcd/build",
+  "command": "/usr/bin/g++  -DDISABLE_LIBUSB_1_0 -DDISABLE_PCAP -DDISABLE_PNG -Dqh_QHpointer -DvtkRenderingContext2D_AUTOINIT=\"1(vtkRenderingContextOpenGL2)\" -DvtkRenderingCore_AUTOINIT=\"3(vtkInteractionStyle,vtkRenderingFreeType,vtkRenderingOpenGL2)\" -isystem /usr/include/vtk-7.1 -isystem /usr/include/freetype2 -isystem /usr/include/eigen3 -isystem /usr/include/pcl-1.10 -isystem /usr/include/ni -isystem /usr/include/openni2  -std=c++14  -O3 -DNDEBUG   -o CMakeFiles/visualizedense.dir/visualizedense.cpp.o -c /home/shitong/segementation/semantic_test/bin2pcd/visualizedense.cpp",
+  "file": "/home/shitong/segementation/semantic_test/bin2pcd/visualizedense.cpp"
+},
+{
+  "directory": "/home/shitong/segementation/semantic_test/bin2pcd/build",
+  "command": "/usr/bin/g++  -DDISABLE_LIBUSB_1_0 -DDISABLE_PCAP -DDISABLE_PNG -Dqh_QHpointer -DvtkRenderingContext2D_AUTOINIT=\"1(vtkRenderingContextOpenGL2)\" -DvtkRenderingCore_AUTOINIT=\"3(vtkInteractionStyle,vtkRenderingFreeType,vtkRenderingOpenGL2)\" -isystem /usr/include/vtk-7.1 -isystem /usr/include/freetype2 -isystem /usr/include/eigen3 -isystem /usr/include/pcl-1.10 -isystem /usr/include/ni -isystem /usr/include/openni2  -std=c++14  -O3 -DNDEBUG   -o CMakeFiles/filterpcd.dir/filterpcd.cpp.o -c /home/shitong/segementation/semantic_test/bin2pcd/filterpcd.cpp",
+  "file": "/home/shitong/segementation/semantic_test/bin2pcd/filterpcd.cpp"
+},
+{
+  "directory": "/home/shitong/segementation/semantic_test/bin2pcd/build",
+  "command": "/usr/bin/g++  -DDISABLE_LIBUSB_1_0 -DDISABLE_PCAP -DDISABLE_PNG -Dqh_QHpointer -DvtkRenderingContext2D_AUTOINIT=\"1(vtkRenderingContextOpenGL2)\" -DvtkRenderingCore_AUTOINIT=\"3(vtkInteractionStyle,vtkRenderingFreeType,vtkRenderingOpenGL2)\" -isystem /usr/include/vtk-7.1 -isystem /usr/include/freetype2 -isystem /usr/include/eigen3 -isystem /usr/include/pcl-1.10 -isystem /usr/include/ni -isystem /usr/include/openni2  -std=c++14  -O3 -DNDEBUG   -o CMakeFiles/merge_pc.dir/merge_pc.cpp.o -c /home/shitong/segementation/semantic_test/bin2pcd/merge_pc.cpp",
+  "file": "/home/shitong/segementation/semantic_test/bin2pcd/merge_pc.cpp"
+},
+{
+  "directory": "/home/shitong/segementation/semantic_test/bin2pcd/build",
+  "command": "/usr/bin/g++  -DDISABLE_LIBUSB_1_0 -DDISABLE_PCAP -DDISABLE_PNG -Dqh_QHpointer -DvtkRenderingContext2D_AUTOINIT=\"1(vtkRenderingContextOpenGL2)\" -DvtkRenderingCore_AUTOINIT=\"3(vtkInteractionStyle,vtkRenderingFreeType,vtkRenderingOpenGL2)\" -isystem /usr/include/vtk-7.1 -isystem /usr/include/freetype2 -isystem /usr/include/eigen3 -isystem /usr/include/pcl-1.10 -isystem /usr/include/ni -isystem /usr/include/openni2  -std=c++14  -O3 -DNDEBUG   -o CMakeFiles/bin2pcd.dir/bin2pcd.cpp.o -c /home/shitong/segementation/semantic_test/bin2pcd/bin2pcd.cpp",
+  "file": "/home/shitong/segementation/semantic_test/bin2pcd/bin2pcd.cpp"
+}
+]

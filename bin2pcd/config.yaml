@@ -1,0 +1,14 @@
+pc_file: ../bin/denserpc.bin
+output_file: ../bin/denserpc.pcd
+
+semantickitti_path: /media/shitong/passport/SemanticKITTI/sequences/
+velodyne_folder: velodyne/
+merge_output_folder: pcd/
+calib_file: calib.txt
+poses_file: poses.txt
+merge_sequence:
+ - 3
+
+filter_pcd: ../bin/denserpc.pcd
+
+view_path: /home/shitong/Datasets/03/
